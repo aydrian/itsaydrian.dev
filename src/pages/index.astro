@@ -1,11 +1,36 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const github = {
+	name: 'Aydrian Howard',
+	username: 'aydrian',
+	bio: 'Hoosier in the big city. Corgi Dad. Uncle. Nerd. I prefer TypeScript, but I\'ve dabbled in Python and Ruby. Continuously learning Rust.',
+	avatar: 'https://avatars.githubusercontent.com/u/981130?v=4',
+	location: 'New York, NY',
+	followers: 59,
+	repos: 120,
+	website: 'https://itsaydrian.com'
+};
 ---
 
 <Layout>
-	<Welcome />
+	<main class="center">
+		<img src={github.avatar} alt={`${github.name} avatar`} class="avatar" />
+		<h1>{github.name}</h1>
+		<p class="bio">{github.bio}</p>
+		<p class="meta">{github.location} · {github.followers} followers · {github.repos} repos</p>
+		<div class="links">
+			<a href={`https://github.com/${github.username}`} class="btn" target="_blank" rel="noopener">View on GitHub</a>
+			<a href={github.website} class="muted" target="_blank" rel="noopener">itsaydrian.com</a>
+		</div>
+	</main>
 </Layout>
+
+<style>
+.center { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;padding:2rem; }
+.avatar { width:140px;height:140px;border-radius:9999px;box-shadow:0 6px 18px rgba(0,0,0,0.12);margin-bottom:1rem; }
+.bio { max-width:56ch;margin:0.5rem 0;color:var(--astro-text-muted,#555); }
+.meta { color:#666;font-size:.95rem;margin-bottom:1rem; }
+.btn { background:#111;color:white;padding:.6rem 1rem;border-radius:999px;text-decoration:none;font-weight:600;margin-right:.6rem; }
+.muted { color:#0366d6;text-decoration:none;margin-left:.5rem; }
+</style>
