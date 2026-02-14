@@ -14,23 +14,14 @@ const github = {
 ---
 
 <Layout>
-	<main class="center">
-		<img src={github.avatar} alt={`${github.name} avatar`} class="avatar" />
-		<h1>{github.name}</h1>
-		<p class="bio">{github.bio}</p>
-		<p class="meta">{github.location} · {github.followers} followers · {github.repos} repos</p>
-		<div class="links">
-			<a href={`https://github.com/${github.username}`} class="btn" target="_blank" rel="noopener">View on GitHub</a>
-			<a href={github.website} class="muted" target="_blank" rel="noopener">itsaydrian.com</a>
+	<main class="min-h-[70vh] flex flex-col items-center justify-center text-center p-8">
+		<img src={github.avatar} alt={`${github.name} avatar`} class="w-36 h-36 rounded-full shadow-lg mb-4" />
+		<h1 class="text-3xl font-semibold">{github.name}</h1>
+		<p class="max-w-[56ch] mt-2 text-gray-600">{github.bio}</p>
+		<p class="text-gray-500 text-sm mb-4 mt-2">{github.location} · {github.followers} followers · {github.repos} repos</p>
+		<div class="flex items-center">
+			<a href={`https://github.com/${github.username}`} class="bg-black text-white px-4 py-2 rounded-full font-semibold mr-3 hover:opacity-95" target="_blank" rel="noopener">View on GitHub</a>
+			<a href={github.website} class="text-blue-600 hover:underline" target="_blank" rel="noopener">itsaydrian.com</a>
 		</div>
 	</main>
 </Layout>
-
-<style>
-.center { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;padding:2rem; }
-.avatar { width:140px;height:140px;border-radius:9999px;box-shadow:0 6px 18px rgba(0,0,0,0.12);margin-bottom:1rem; }
-.bio { max-width:56ch;margin:0.5rem 0;color:var(--astro-text-muted,#555); }
-.meta { color:#666;font-size:.95rem;margin-bottom:1rem; }
-.btn { background:#111;color:white;padding:.6rem 1rem;border-radius:999px;text-decoration:none;font-weight:600;margin-right:.6rem; }
-.muted { color:#0366d6;text-decoration:none;margin-left:.5rem; }
-</style>
