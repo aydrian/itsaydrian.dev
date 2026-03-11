@@ -1,0 +1,185 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const talks = [
+  {
+    title: 'I, Agent: Identity-First Security for the Autonomous Future',
+    event: 'Orlando Code Camp',
+    date: new Date('2026-04-11'),
+    location: 'Sanford, FL',
+    description: "Examines AI agent security through an Identity-First framework inspired by Asimov's Three Laws — Identity, Scope, and Integrity. Demonstrates how Auth0 authentication establishes a secure foundation for autonomous AI systems.",
+    url: 'https://www.orlandocodecamp.com/',
+    slides: null,
+    video: null,
+  },
+  {
+    title: 'I, Agent: Identity-First Security for the Autonomous Future',
+    event: 'All Things AI 2026',
+    date: new Date('2026-03-23'),
+    location: 'Durham, NC',
+    description: "Examines AI agent security through an Identity-First framework inspired by Asimov's Three Laws — Identity, Scope, and Integrity. Demonstrates how Auth0 authentication establishes a secure foundation for autonomous AI systems.",
+    url: 'https://2026.allthingsai.org/sessions/i-agent-identity-first-security-for-the-autonomous-future',
+    slides: null,
+    video: null,
+  },
+  {
+    title: 'Trust, but Verify: Identity and Observability for AI Agents',
+    event: 'Arize Builders Meetup – NYC',
+    date: new Date('2026-03-12'),
+    location: 'New York, NY',
+    description: 'AI agents that take real actions (reading email, making purchases, querying private documents) need more than a system prompt to be safe. In this session, we\'ll look at how identity management and observability tooling work together to make AI agents trustworthy: ensuring agents only act within authorized boundaries, and giving you full visibility into every decision they make.',
+    url: 'https://luma.com/ajy0fdyf',
+    slides: null,
+    video: null,
+  }
+];
+
+const upcomingTalks = talks
+  .filter(t => t.date >= today)
+  .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+const pastTalks = talks
+  .filter(t => t.date < today)
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+---
+
+<Layout
+  title="Speaking — Aydrian Howard"
+  description="Conference talks, workshops, and presentations."
+>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="mb-12">
+      <p class="section-label">Speaking</p>
+      <h1 class="text-4xl font-semibold mb-3" style="font-family: 'Fraunces', serif;">Talks &amp; Appearances</h1>
+      <p class="text-base max-w-prose" style="color: var(--text-muted);">
+        Conference talks, workshops, and other appearances. I enjoy speaking about developer
+        experience, TypeScript, and the human side of building software.
+      </p>
+    </div>
+
+    <!-- Speaking CTA -->
+    <div
+      class="card p-6 mb-12 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+      style="border-color: var(--accent); background: linear-gradient(135deg, transparent, rgba(227, 75, 38, 0.04));"
+    >
+      <div class="flex-1">
+        <h2 class="font-semibold mb-1" style="color: var(--text);">Interested in having me speak?</h2>
+        <p class="text-sm" style="color: var(--text-muted);">
+          I'm open to conference talks and workshops on TypeScript, developer advocacy, and Rust.
+        </p>
+      </div>
+      <a
+        href="https://twitter.com/itsaydrian"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90 shrink-0"
+        style="background: var(--accent); color: #fff;"
+      >
+        Get in touch
+      </a>
+    </div>
+
+    <!-- Upcoming talks -->
+    {upcomingTalks.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-semibold mb-4" style="font-family: 'Fraunces', serif; color: var(--text);">Upcoming</h2>
+        <ul class="flex flex-col gap-4">
+          {upcomingTalks.map(talk => (
+            <li class="card p-6" style="border-color: var(--accent);">
+              <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div class="flex-1 min-w-0">
+                  {talk.url
+                    ? <a href={talk.url} target="_blank" rel="noopener noreferrer" class="block font-semibold text-base leading-snug mb-2 hover:underline" style="color: var(--text);">{talk.title}</a>
+                    : <h3 class="font-semibold text-base leading-snug mb-2" style="color: var(--text);">{talk.title}</h3>
+                  }
+                  <p class="text-sm leading-relaxed mb-4" style="color: var(--text-muted);">
+                    {talk.description}
+                  </p>
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" style="color: var(--text-faint);">
+                    <span class="font-medium" style="color: var(--accent-2);">{talk.event}</span>
+                    <span>{talk.location}</span>
+                  </div>
+                  {(talk.slides || talk.video) && (
+                    <div class="flex gap-3 mt-4">
+                      {talk.slides && (
+                        <a href={talk.slides} target="_blank" rel="noopener noreferrer" class="tag hover:border-[var(--accent)] transition-colors">
+                          Slides
+                        </a>
+                      )}
+                      {talk.video && (
+                        <a href={talk.video} target="_blank" rel="noopener noreferrer" class="tag hover:border-[var(--accent)] transition-colors">
+                          Video
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <time
+                  class="text-xs shrink-0 font-semibold tracking-wide"
+                  datetime={talk.date.toISOString()}
+                  style="color: var(--accent);"
+                >
+                  {talk.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- Past talks -->
+    {pastTalks.length > 0 && (
+      <section>
+        <h2 class="text-xl font-semibold mb-4" style="font-family: 'Fraunces', serif; color: var(--text);">Past Talks</h2>
+        <ul class="flex flex-col gap-4">
+          {pastTalks.map(talk => (
+            <li class="card p-6">
+              <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div class="flex-1 min-w-0">
+                  {talk.url
+                    ? <a href={talk.url} target="_blank" rel="noopener noreferrer" class="block font-semibold text-base leading-snug mb-2 hover:underline" style="color: var(--text);">{talk.title}</a>
+                    : <h3 class="font-semibold text-base leading-snug mb-2" style="color: var(--text);">{talk.title}</h3>
+                  }
+                  <p class="text-sm leading-relaxed mb-4" style="color: var(--text-muted);">
+                    {talk.description}
+                  </p>
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" style="color: var(--text-faint);">
+                    <span class="font-medium" style="color: var(--accent-2);">{talk.event}</span>
+                    <span>{talk.location}</span>
+                  </div>
+                  {(talk.slides || talk.video) && (
+                    <div class="flex gap-3 mt-4">
+                      {talk.slides && (
+                        <a href={talk.slides} target="_blank" rel="noopener noreferrer" class="tag hover:border-[var(--accent)] transition-colors">
+                          Slides
+                        </a>
+                      )}
+                      {talk.video && (
+                        <a href={talk.video} target="_blank" rel="noopener noreferrer" class="tag hover:border-[var(--accent)] transition-colors">
+                          Video
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <time
+                  class="text-xs shrink-0 font-semibold tracking-wide"
+                  datetime={talk.date.toISOString()}
+                  style="color: var(--text-faint);"
+                >
+                  {talk.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+                </time>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+  </div>
+</Layout>

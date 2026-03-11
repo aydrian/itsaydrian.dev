@@ -1,0 +1,65 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout
+  title="Articles — Aydrian Howard"
+  description="Writing about TypeScript, Rust, developer advocacy, and building in public."
+>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="mb-12">
+      <p class="section-label">Writing</p>
+      <h1 class="text-4xl font-semibold mb-3" style="font-family: 'Fraunces', serif;">Articles</h1>
+      <p class="text-base max-w-prose" style="color: var(--text-muted);">
+        Thoughts on TypeScript, Rust, developer advocacy, and the craft of building software.
+      </p>
+    </div>
+
+    {articles.length > 0 ? (
+      <ul class="flex flex-col gap-3">
+        {articles.map(article => (
+          <li>
+            <a
+              href={`/articles/${article.id}`}
+              class="card group flex flex-col sm:flex-row sm:items-start gap-4 p-6 no-underline block"
+            >
+              <div class="flex-1 min-w-0">
+                <h2 class="font-semibold text-lg leading-snug group-hover:text-[var(--accent)] transition-colors" style="color: var(--text);">
+                  {article.data.title}
+                </h2>
+                <p class="text-sm mt-2 leading-relaxed" style="color: var(--text-muted);">
+                  {article.data.description}
+                </p>
+                {article.data.tags.length > 0 && (
+                  <ul class="flex flex-wrap gap-1.5 mt-3">
+                    {article.data.tags.map(tag => <li class="tag">{tag}</li>)}
+                  </ul>
+                )}
+              </div>
+              <time
+                class="text-xs shrink-0 pt-1"
+                datetime={article.data.pubDate.toISOString()}
+                style="color: var(--text-faint);"
+              >
+                {article.data.pubDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </time>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <div class="card p-12 text-center">
+        <p class="text-base" style="color: var(--text-muted);">No articles yet — check back soon.</p>
+      </div>
+    )}
+  </div>
+</Layout>

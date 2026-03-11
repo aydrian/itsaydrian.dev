@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const projects = [
+  {
+    name: 'Drizzle + Neon Starter',
+    description: 'A production-ready starter template for building full-stack TypeScript apps with Drizzle ORM and Neon serverless Postgres.',
+    url: 'https://github.com/aydrian',
+    tags: ['TypeScript', 'Drizzle ORM', 'Neon', 'Next.js'],
+    status: 'Active',
+  },
+  {
+    name: 'Twilio SMS Alerts',
+    description: 'Open-source library for sending structured SMS alerts from Node.js applications with rate limiting and retry logic built in.',
+    url: 'https://github.com/aydrian',
+    tags: ['TypeScript', 'Node.js', 'Twilio'],
+    status: 'Maintained',
+  },
+  {
+    name: 'itsaydrian.dev',
+    description: 'This very site — a personal developer portfolio built with Astro 6, deployed on Cloudflare Workers, styled with Tailwind CSS v4.',
+    url: 'https://github.com/aydrian/itsaydrian-dev',
+    tags: ['Astro', 'Cloudflare', 'Tailwind CSS'],
+    status: 'Active',
+  },
+  {
+    name: 'Rust CLI Toolkit',
+    description: 'A growing collection of small, focused CLI utilities written in Rust — a learning project that occasionally becomes useful.',
+    url: 'https://github.com/aydrian',
+    tags: ['Rust', 'CLI'],
+    status: 'In Progress',
+  },
+];
+
+const statusColors: Record<string, string> = {
+  'Active':      'background: var(--accent); color: #fff; border-color: var(--accent);',
+  'Maintained':  'background: var(--bg-secondary); color: var(--accent-2); border-color: var(--accent-2);',
+  'In Progress': 'background: var(--bg-secondary); color: var(--text-muted); border-color: var(--border);',
+  'Archived':    'background: var(--bg-secondary); color: var(--text-faint); border-color: var(--border);',
+};
+---
+
+<Layout
+  title="Projects — Aydrian Howard"
+  description="Open-source projects, tools, and experiments."
+>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="mb-12">
+      <p class="section-label">Work</p>
+      <h1 class="text-4xl font-semibold mb-3" style="font-family: 'Fraunces', serif;">Projects</h1>
+      <p class="text-base max-w-prose" style="color: var(--text-muted);">
+        Open-source work, side projects, and experiments. The stuff I build when I'm not
+        advocating for someone else's stuff.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      {projects.map(project => (
+        <a
+          href={project.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="card group p-6 flex flex-col gap-4 no-underline"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <h2
+              class="font-semibold text-base leading-snug group-hover:text-[var(--accent)] transition-colors"
+              style="color: var(--text);"
+            >
+              {project.name}
+            </h2>
+            <span
+              class="tag shrink-0 text-xs"
+              style={statusColors[project.status] ?? statusColors['Maintained']}
+            >
+              {project.status}
+            </span>
+          </div>
+
+          <p class="text-sm leading-relaxed flex-1" style="color: var(--text-muted);">
+            {project.description}
+          </p>
+
+          <ul class="flex flex-wrap gap-1.5 mt-auto">
+            {project.tags.map(tag => <li class="tag">{tag}</li>)}
+          </ul>
+        </a>
+      ))}
+    </div>
+
+    <!-- GitHub CTA -->
+    <div class="mt-12 text-center">
+      <p class="text-sm mb-4" style="color: var(--text-muted);">
+        More experiments and work-in-progress repos on GitHub.
+      </p>
+      <a
+        href="https://github.com/aydrian"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all hover:opacity-90 hover:-translate-y-0.5"
+        style="background: var(--accent); color: #fff;"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        View GitHub profile
+      </a>
+    </div>
+
+  </div>
+</Layout>

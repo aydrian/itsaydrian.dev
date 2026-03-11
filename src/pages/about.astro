@@ -1,0 +1,133 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import profileImage from '../assets/aydrian+atticus25.png';
+
+const skills = [
+  { label: 'TypeScript', accent: true },
+  { label: 'Node.js', accent: false },
+  { label: 'Rust', accent: false },
+  { label: 'Astro', accent: false },
+  { label: 'React', accent: false },
+  { label: 'PostgreSQL', accent: false },
+  { label: 'Cloudflare Workers', accent: false },
+  { label: 'Python', accent: false },
+];
+---
+
+<Layout
+  title="About — Aydrian Howard"
+  description="I'm Aydrian Howard — developer advocate, builder, and Corgi enthusiast based in New York, NY."
+>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+
+    <!-- Header -->
+    <div class="mb-16">
+      <p class="section-label">About</p>
+      <h1 class="text-4xl font-semibold" style="font-family: 'Fraunces', serif;">
+        Howdy, I'm Aydrian. 👋
+      </h1>
+    </div>
+
+    <!-- Bio + Photo -->
+    <div class="flex flex-col md:flex-row gap-12 md:gap-16 mb-16">
+      <div class="flex-1 space-y-5">
+        <p class="text-base leading-relaxed" style="color: var(--text-muted);">
+          I'm a developer advocate, engineer, and community builder based in New York, NY.
+          Originally from Indiana (always a Hoosier), I've spent the last decade helping
+          developers build better things — through writing, speaking, and open-source work.
+        </p>
+        <p class="text-base leading-relaxed" style="color: var(--text-muted);">
+          My main language is <strong style="color: var(--text);">TypeScript</strong>, though I've
+          dabbled in Python, Ruby, and Go over the years. I'm currently on a slow but steady
+          journey learning <strong style="color: var(--text);">Rust</strong> — the compiler
+          keeps me honest.
+        </p>
+        <p class="text-base leading-relaxed" style="color: var(--text-muted);">
+          Outside of code: I'm a proud uncle, a Corgi dad to the legendary
+          <a href="https://www.instagram.com/atticusthecorg" target="_blank" rel="noopener noreferrer" class="font-semibold underline decoration-dotted underline-offset-2 hover:opacity-80" style="color: var(--text);">Atticus</a>, and an enthusiastic but
+          perpetually average home cook.
+        </p>
+        <p class="text-base leading-relaxed" style="color: var(--text-muted);">
+          I believe developer advocacy is fundamentally about empathy — meeting developers
+          where they are, understanding their problems, and making hard things feel achievable.
+        </p>
+      </div>
+
+      <!-- Photo -->
+      <div class="shrink-0 self-start md:mt-0">
+        <div class="relative" style="width: 200px;">
+          <div
+            class="absolute inset-0 rounded-xl rotate-2 scale-[0.97]"
+            style="background: var(--accent-2); opacity: 0.2;"
+          ></div>
+          <Image
+            src={profileImage}
+            alt="Aydrian Howard with his corgi Atticus"
+            width={400}
+            height={400}
+            class="relative rounded-xl w-full h-auto shadow-lg object-cover"
+            style="aspect-ratio: 1/1;"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="mb-16">
+      <p class="section-label">Skills</p>
+      <h2 class="text-2xl font-semibold mb-6" style="font-family: 'Fraunces', serif;">Technologies</h2>
+      <div class="flex flex-wrap gap-2">
+        {skills.map(skill => (
+          <span
+            class="tag text-sm px-3 py-1.5"
+            style={skill.accent ? 'background: var(--accent); color: #fff; border-color: var(--accent);' : ''}
+          >
+            {skill.label}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <!-- Connect -->
+    <div>
+      <p class="section-label">Connect</p>
+      <h2 class="text-2xl font-semibold mb-6" style="font-family: 'Fraunces', serif;">Get in touch</h2>
+      <p class="text-base leading-relaxed mb-6" style="color: var(--text-muted);">
+        The best way to reach me is on Twitter/X or LinkedIn. I'm always happy to talk about
+        developer advocacy, TypeScript, Rust, or Corgis.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href="https://twitter.com/itsaydrian"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90 hover:-translate-y-0.5"
+          style="background: var(--accent); color: #fff;"
+        >Twitter / X</a>
+        <a
+          href="https://github.com/aydrian"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:-translate-y-0.5"
+          style="background: var(--bg-secondary); color: var(--text); border: 1px solid var(--border);"
+        >GitHub</a>
+        <a
+          href="https://www.linkedin.com/in/aydrian/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:-translate-y-0.5"
+          style="background: var(--bg-secondary); color: var(--text); border: 1px solid var(--border);"
+        >LinkedIn</a>
+        <a
+          href="https://www.instagram.com/itsaydrian"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:-translate-y-0.5"
+          style="background: var(--bg-secondary); color: var(--text); border: 1px solid var(--border);"
+        >Instagram</a>
+      </div>
+    </div>
+
+  </div>
+</Layout>

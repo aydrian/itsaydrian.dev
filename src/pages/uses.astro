@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const categories = [
+  {
+    name: 'Hardware',
+    icon: '💻',
+    items: [
+      { name: 'MacBook Pro 16"', detail: 'M3 Max, 36GB RAM — primary development machine' },
+      { name: 'LG UltraFine 5K', detail: '27" — the display that actually makes the M chip worth it' },
+      { name: 'Apple Magic Keyboard', detail: 'With Touch ID — the muscle memory is permanent at this point' },
+      { name: 'Logitech MX Master 3', detail: 'Horizontal scroll wheel alone is worth the price' },
+      { name: 'Sony WH-1000XM5', detail: 'Noise canceling for open offices and coffee shops' },
+      { name: 'CalDigit TS4', detail: 'Thunderbolt dock — one cable to rule them all' },
+    ],
+  },
+  {
+    name: 'Editor & Terminal',
+    icon: '⌨️',
+    items: [
+      { name: 'VS Code', detail: 'Primary editor — with Vim keybindings via the VSCodeVim extension' },
+      { name: 'Neovim', detail: 'For when I want to feel like a hacker. Or when VS Code is slow.' },
+      { name: 'Warp', detail: 'Terminal that actually understands what I\'m trying to do' },
+      { name: 'GitHub Copilot', detail: 'AI pair programmer — remarkably good at TypeScript' },
+      { name: 'Catppuccin Mocha', detail: 'Theme — soft on the eyes during long sessions' },
+      { name: 'JetBrains Mono', detail: 'Font — ligatures on, judge me if you must' },
+    ],
+  },
+  {
+    name: 'Development Tools',
+    icon: '🔧',
+    items: [
+      { name: 'Bun', detail: 'Package manager and runtime — the speed is real' },
+      { name: 'Turso / Neon', detail: 'Serverless databases for different workloads' },
+      { name: 'Cloudflare Workers', detail: 'Edge runtime — this site runs on it' },
+      { name: 'Astro', detail: 'Static site framework — zero JS by default is the right default' },
+      { name: 'Drizzle ORM', detail: 'TypeScript ORM — SQL-first philosophy I can get behind' },
+      { name: 'Docker', detail: 'For local services and the occasional containerized deployment' },
+    ],
+  },
+  {
+    name: 'Apps & Productivity',
+    icon: '📱',
+    items: [
+      { name: 'Raycast', detail: 'Spotlight replacement that I now can\'t live without' },
+      { name: 'Arc', detail: 'Browser — spaces finally solved tab management for me' },
+      { name: 'Notion', detail: 'Notes, plans, and article drafts' },
+      { name: 'Figma', detail: 'Design mockups and diagram sketching' },
+      { name: 'TablePlus', detail: 'Database GUI — clean, fast, supports everything' },
+      { name: 'Screenflow', detail: 'Screen recording and demo video editing' },
+    ],
+  },
+];
+---
+
+<Layout
+  title="Uses — Aydrian Howard"
+  description="The hardware, software, and tools I use daily."
+>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="mb-12">
+      <p class="section-label">Setup</p>
+      <h1 class="text-4xl font-semibold mb-3" style="font-family: 'Fraunces', serif;">Uses</h1>
+      <p class="text-base max-w-prose" style="color: var(--text-muted);">
+        The hardware, software, and tools I reach for every day. Inspired by
+        <a href="https://uses.tech" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-80" style="color: var(--accent);">uses.tech</a>.
+      </p>
+    </div>
+
+    <div class="space-y-12">
+      {categories.map(category => (
+        <section>
+          <h2 class="text-xl font-semibold mb-6 flex items-center gap-3" style="font-family: 'Fraunces', serif; color: var(--text);">
+            <span aria-hidden="true">{category.icon}</span>
+            {category.name}
+          </h2>
+
+          <dl class="space-y-4">
+            {category.items.map(item => (
+              <div
+                class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 py-3 border-b"
+                style="border-color: var(--border);"
+              >
+                <dt class="font-medium text-sm sm:w-48 shrink-0" style="color: var(--text);">
+                  {item.name}
+                </dt>
+                <dd class="text-sm leading-relaxed" style="color: var(--text-muted);">
+                  {item.detail}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ))}
+    </div>
+
+  </div>
+</Layout>
