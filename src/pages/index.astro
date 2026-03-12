@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import profileImage from '../assets/aydrian+atticus25.png';
 
@@ -109,8 +108,8 @@ const workHistory = [
             class="absolute inset-0 rounded-2xl -rotate-2 scale-[0.98]"
             style="background: var(--accent); opacity: 0.15;"
           ></div>
-          <Image
-            src={profileImage}
+          <img
+            src={profileImage.src}
             alt="Aydrian Howard with his corgi Atticus"
             width={440}
             height={440}

@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
 import profileImage from '../assets/aydrian+atticus25.png';
 
 const skills = [
@@ -61,8 +60,8 @@ const skills = [
             class="absolute inset-0 rounded-xl rotate-2 scale-[0.97]"
             style="background: var(--accent-2); opacity: 0.2;"
           ></div>
-          <Image
-            src={profileImage}
+          <img
+            src={profileImage.src}
             alt="Aydrian Howard with his corgi Atticus"
             width={400}
             height={400}

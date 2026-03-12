@@ -8,9 +8,6 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   integrations: [mdx()],
   adapter: cloudflare(),
-  image: {
-    service: { entrypoint: 'astro/assets/services/sharp' }
-  },
   vite: {
     plugins: [tailwindcss()]
   }
