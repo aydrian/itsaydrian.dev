@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trust, but Verify: Identity and Observability for AI Agents</title>
+
+<!-- Fontshare: Clash Display (headings) + Satoshi (body) -->
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — NEON CYBER THEME
+   Matches i-agent presentation palette
+   =========================================== */
+:root {
+  --bg-deep:       #060b18;
+  --bg-navy:       #0a0f1c;
+  --bg-card:       #0d1526;
+  --bg-surface:    #111d33;
+
+  --cyan:          #00ffcc;
+  --cyan-dim:      rgba(0, 255, 204, 0.45);
+  --cyan-glow:     rgba(0, 255, 204, 0.12);
+  --magenta:       #ff00aa;
+  --magenta-dim:   rgba(255, 0, 170, 0.4);
+  --magenta-glow:  rgba(255, 0, 170, 0.12);
+  --amber:         #ffb800;
+  --amber-glow:    rgba(255, 184, 0, 0.15);
+  --red-warn:      #ff3355;
+
+  --text-primary:  #e8f4f8;
+  --text-secondary:#7a9eae;
+  --text-dim:      #3a5a6a;
+
+  --grid-line:     rgba(0, 255, 204, 0.04);
+  --border:        rgba(0, 255, 204, 0.15);
+  --border-dim:    rgba(255, 255, 255, 0.06);
+
+  --font-display:  'Clash Display', sans-serif;
+  --font-body:     'Satoshi', sans-serif;
+  --font-mono:     'Courier New', monospace;
+
+  --title-size:    clamp(2rem, 5.5vw, 5.5rem);
+  --h2-size:       clamp(1.4rem, 3.2vw, 3rem);
+  --h3-size:       clamp(1rem, 2vw, 1.75rem);
+  --body-size:     clamp(0.78rem, 1.35vw, 1.05rem);
+  --small-size:    clamp(0.65rem, 1vw, 0.82rem);
+  --code-size:     clamp(0.65rem, 1.05vw, 0.9rem);
+
+  --slide-padding: clamp(2rem, 5vw, 5rem);
+  --content-gap:   clamp(0.5rem, 1.4vw, 1.4rem);
+
+  --ease-expo:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-back:     cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===========================================
+   VIEWPORT BASE (mandatory — from viewport-base.css)
+   =========================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+}
+
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+}
+
+img, .image-container {
+  max-width: 100%;
+  max-height: min(50vh, 400px);
+  object-fit: contain;
+}
+
+/* Grid for cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: clamp(0.5rem, 1.2vw, 1rem);
+}
+
+/* Lists */
+.feature-list, .bullet-list {
+  gap: clamp(0.4rem, 1vh, 0.9rem);
+}
+.feature-list li, .bullet-list li {
+  font-size: var(--body-size);
+  line-height: 1.45;
+}
+
+/* Short viewports */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap: clamp(0.3rem, 1.2vw, 0.9rem);
+    --title-size: clamp(1.3rem, 4.5vw, 2.8rem);
+    --h2-size: clamp(1rem, 3vw, 1.8rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+    --content-gap: clamp(0.25rem, 1vw, 0.65rem);
+    --title-size: clamp(1.1rem, 4vw, 2rem);
+    --body-size: clamp(0.68rem, 1.1vw, 0.9rem);
+  }
+  .nav-dots, .keyboard-hint, .decorative { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 1rem);
+    --title-size: clamp(1rem, 3.5vw, 1.5rem);
+    --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+    --body-size: clamp(0.65rem, 1vw, 0.82rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ===========================================
+   SHARED BACKGROUND — GRID + GRADIENT
+   =========================================== */
+.slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.slide-content, .slide > * { position: relative; z-index: 1; }
+
+/* ===========================================
+   ANIMATIONS — REVEAL SYSTEM
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s var(--ease-expo),
+              transform 0.65s var(--ease-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.65s var(--ease-expo), transform 0.65s var(--ease-expo);
+}
+.slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.65s var(--ease-expo), transform 0.65s var(--ease-expo);
+}
+.slide.visible .reveal-right { opacity: 1; transform: translateX(0); }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.65s var(--ease-expo), transform 0.65s var(--ease-expo);
+}
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+/* Stagger delays */
+.d1 { transition-delay: 0.08s; }
+.d2 { transition-delay: 0.18s; }
+.d3 { transition-delay: 0.28s; }
+.d4 { transition-delay: 0.38s; }
+.d5 { transition-delay: 0.48s; }
+.d6 { transition-delay: 0.58s; }
+.d7 { transition-delay: 0.68s; }
+
+/* ===========================================
+   TYPOGRAPHY
+   =========================================== */
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--h2-size);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  margin-bottom: var(--content-gap);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+p, li {
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.accent-cyan  { color: var(--cyan); }
+.accent-mag   { color: var(--magenta); }
+.accent-amber { color: var(--amber); }
+
+/* ===========================================
+   LABEL / PILL COMPONENTS
+   =========================================== */
+.label {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.25em 0.75em;
+  border-radius: 999px;
+  display: inline-block;
+}
+.label-cyan {
+  background: var(--cyan-glow);
+  border: 1px solid var(--border);
+  color: var(--cyan);
+}
+.label-mag {
+  background: var(--magenta-glow);
+  border: 1px solid rgba(255, 0, 170, 0.25);
+  color: var(--magenta);
+}
+.label-amber {
+  background: var(--amber-glow);
+  border: 1px solid rgba(255, 184, 0, 0.3);
+  color: var(--amber);
+}
+
+/* LIVE DEMO badge — special large variant */
+.live-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-display);
+  font-size: clamp(0.65rem, 1.1vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.4em 1em;
+  border-radius: 999px;
+  background: var(--amber-glow);
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  box-shadow: 0 0 16px rgba(255, 184, 0, 0.25);
+  animation: pulse-amber 2.4s ease-in-out infinite;
+}
+.live-demo-badge::before {
+  content: '';
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes pulse-amber {
+  0%, 100% { box-shadow: 0 0 16px rgba(255, 184, 0, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(255, 184, 0, 0.5); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* ===========================================
+   CARD COMPONENT
+   =========================================== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  padding: clamp(0.8rem, 1.5vw, 1.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.6vw, 0.6rem);
+}
+.card:hover {
+  border-color: var(--border);
+  box-shadow: 0 0 20px var(--cyan-glow);
+  transform: translateY(-2px);
+  transition: all 0.3s var(--ease-expo);
+}
+.card .card-icon {
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  line-height: 1;
+}
+.card .card-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.card .card-desc {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* ===========================================
+   BULLET LIST — custom style
+   =========================================== */
+.point-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1.2vh, 1rem);
+}
+.point-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75em;
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.point-list li::before {
+  content: '▸';
+  color: var(--cyan);
+  flex-shrink: 0;
+  margin-top: 0.1em;
+}
+.point-list.mag li::before { color: var(--magenta); }
+.point-list li strong { color: var(--text-primary); font-weight: 700; }
+
+/* ===========================================
+   CODE / PROMPT BLOCK
+   =========================================== */
+.prompt-block {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  border-radius: 6px;
+  padding: clamp(0.6rem, 1.2vw, 1rem) clamp(0.8rem, 1.4vw, 1.2rem);
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+.prompt-block::before {
+  content: '›';
+  font-size: 1.2em;
+  color: var(--cyan-dim);
+  flex-shrink: 0;
+}
+.prompt-block.mag {
+  border-left-color: var(--magenta);
+  color: var(--magenta);
+}
+.prompt-block.mag::before { color: var(--magenta-dim); }
+
+/* ===========================================
+   TRACE TREE COMPONENT
+   =========================================== */
+.trace-tree {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: clamp(0.8rem, 1.5vw, 1.2rem);
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+.trace-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--text-secondary);
+}
+.trace-root { color: var(--text-primary); font-weight: bold; }
+.trace-indent { padding-left: 1.6em; }
+.trace-indent2 { padding-left: 3.2em; }
+.trace-dot {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.trace-dot.cyan { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.trace-dot.mag  { background: var(--magenta); box-shadow: 0 0 6px var(--magenta); }
+.trace-dot.root { background: var(--amber); box-shadow: 0 0 6px var(--amber); width: 0.7em; height: 0.7em; }
+.trace-name { color: var(--cyan); }
+.trace-name.mag { color: var(--magenta); }
+.trace-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+.trace-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--cyan);
+  transition: width 1s var(--ease-expo);
+}
+.trace-fill.mag { background: var(--magenta); }
+.trace-fill.amber { background: var(--amber); }
+.trace-ms {
+  font-size: calc(var(--code-size) * 0.9);
+  color: var(--text-dim);
+  min-width: 3em;
+  text-align: right;
+}
+
+/* ===========================================
+   PILLAR COLUMN LAYOUT
+   =========================================== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  align-items: start;
+}
+@media (max-width: 700px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+/* ===========================================
+   ARCHITECTURE FLOW
+   =========================================== */
+.arch-flow {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.3rem, 0.8vw, 0.8rem);
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.arch-node {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: clamp(0.4rem, 0.8vw, 0.7rem) clamp(0.6rem, 1.2vw, 1rem);
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+.arch-node .node-label {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arch-node .node-sub {
+  font-family: var(--font-body);
+  font-size: calc(var(--small-size) * 0.9);
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arch-node.accent { border-color: var(--border); box-shadow: 0 0 16px var(--cyan-glow); }
+.arch-arrow {
+  color: var(--cyan-dim);
+  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+  flex-shrink: 0;
+}
+
+/* ===========================================
+   TOOL CHIPS
+   =========================================== */
+.tool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.3rem, 0.6vw, 0.6rem);
+}
+.chip {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 500;
+  padding: 0.3em 0.8em;
+  border-radius: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.chip.cyan { border-color: var(--border); color: var(--cyan); }
+
+/* ===========================================
+   QUESTION SPLIT — Slide 3
+   =========================================== */
+.question-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  height: 100%;
+}
+.q-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  padding: clamp(1.2rem, 2.5vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1.2vw, 1.2rem);
+  justify-content: center;
+}
+.q-panel.cyan-panel {
+  border-color: rgba(0, 255, 204, 0.2);
+  box-shadow: inset 0 0 60px rgba(0, 255, 204, 0.04);
+}
+.q-panel.mag-panel {
+  border-color: rgba(255, 0, 170, 0.2);
+  box-shadow: inset 0 0 60px rgba(255, 0, 170, 0.04);
+}
+.q-number {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.12;
+  position: absolute;
+  top: 0.3em;
+  right: 0.4em;
+}
+.q-panel { position: relative; overflow: hidden; }
+.q-question {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.q-answer {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.8vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.q-desc {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===========================================
+   SYNTHESIS CALLOUT — Slide 11
+   =========================================== */
+.synthesis-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  padding: clamp(1.2rem, 2.5vw, 2.5rem);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.synthesis-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 50%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--cyan));
+}
+.synthesis-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--magenta), transparent);
+}
+.synthesis-quote {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.2vw, 2rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+.synthesis-quote em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===========================================
+   PROGRESS BAR
+   =========================================== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  z-index: 1000;
+  transition: width 0.3s var(--ease-expo);
+  box-shadow: 0 0 8px var(--cyan-dim);
+}
+
+/* ===========================================
+   NAV DOTS
+   =========================================== */
+.nav-dots {
+  position: fixed;
+  right: clamp(0.8rem, 1.5vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-expo);
+  padding: 0;
+}
+.nav-dot.active {
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-dim);
+  transform: scale(1.4);
+}
+
+/* ===========================================
+   KEYBOARD HINT
+   =========================================== */
+.keyboard-hint {
+  position: fixed;
+  bottom: clamp(0.8rem, 1.5vw, 1.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  z-index: 100;
+  opacity: 0;
+  animation: hint-fade 3s ease-in-out 2s forwards;
+}
+.keyboard-hint kbd {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-family: var(--font-mono);
+  font-size: inherit;
+}
+@keyframes hint-fade {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ===========================================
+   SLIDE 1 — TITLE SLIDE
+   =========================================== */
+#slide-1 {
+  background:
+    radial-gradient(ellipse at 70% 30%, rgba(0, 255, 204, 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 20% 80%, rgba(255, 0, 170, 0.06) 0%, transparent 50%),
+    var(--bg-deep);
+}
+.title-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: clamp(0.6rem, 1.2vw, 1rem);
+}
+.title-main {
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  margin-bottom: clamp(0.5rem, 1vw, 0.9rem);
+}
+.title-main .slash {
+  color: var(--magenta);
+  display: block;
+}
+.title-sub {
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 1.6vw, 1.2rem);
+  color: var(--text-secondary);
+  max-width: 55ch;
+  line-height: 1.55;
+  margin-bottom: clamp(1.2rem, 2.5vw, 2.5rem);
+}
+.speaker-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.8rem, 1.5vw, 1.5rem);
+}
+.speaker-photo {
+  width: clamp(2.5rem, 5vw, 4rem);
+  height: clamp(2.5rem, 5vw, 4rem);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  box-shadow: 0 0 16px var(--cyan-glow);
+  flex-shrink: 0;
+}
+.speaker-info { display: flex; flex-direction: column; gap: 0.15em; }
+.speaker-name {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.speaker-title {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+}
+.pillar-tags {
+  position: absolute;
+  bottom: var(--slide-padding);
+  right: var(--slide-padding);
+  display: flex;
+  gap: 0.6em;
+}
+
+/* ===========================================
+   SLIDE-SPECIFIC ACCENT BORDERS
+   =========================================== */
+.slide-border-cyan::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+.slide-border-mag::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--magenta), transparent);
+}
+.slide-border-amber::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+}
+
+/* ===========================================
+   DEMO SLIDE HEADER
+   =========================================== */
+.demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(0.8rem, 1.5vw, 1.5rem);
+}
+
+/* ===========================================
+   STEP / PIPELINE
+   =========================================== */
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.3rem, 0.8vw, 0.8rem);
+  flex-wrap: nowrap;
+}
+.pipeline-step {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: clamp(0.5rem, 1vw, 0.9rem) clamp(0.6rem, 1.2vw, 1rem);
+  text-align: center;
+  min-width: 0;
+}
+.pipeline-step .step-icon { font-size: clamp(1rem, 1.8vw, 1.4rem); line-height: 1; }
+.pipeline-step .step-name {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 0.3em;
+}
+.pipeline-step .step-desc {
+  font-family: var(--font-mono);
+  font-size: calc(var(--small-size) * 0.85);
+  color: var(--text-dim);
+  margin-top: 0.15em;
+}
+.pipeline-step.active { border-color: var(--border); box-shadow: 0 0 12px var(--cyan-glow); }
+.pipeline-arrow {
+  color: var(--cyan-dim);
+  font-size: clamp(0.8rem, 1.4vw, 1rem);
+  flex-shrink: 0;
+}
+
+/* ===========================================
+   TAKEAWAY LIST
+   =========================================== */
+.takeaway-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1.4vh, 1.2rem);
+}
+.takeaway-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1em;
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  padding: clamp(0.7rem, 1.3vw, 1.1rem) clamp(0.9rem, 1.6vw, 1.4rem);
+}
+.takeaway-list li .t-num {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 1.6vw, 1.3rem);
+  font-weight: 700;
+  color: var(--cyan);
+  min-width: 1.5em;
+  line-height: 1.5;
+}
+.takeaway-list li .t-text {
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.takeaway-list li .t-text strong { color: var(--text-primary); }
+
+/* ===========================================
+   RESOURCE LINKS
+   =========================================== */
+.resource-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+}
+.resource-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: clamp(0.6rem, 1.1vw, 1rem);
+  text-decoration: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.resource-link:hover {
+  border-color: var(--border);
+  box-shadow: 0 0 14px var(--cyan-glow);
+}
+.resource-link .r-icon { font-size: clamp(1rem, 1.8vw, 1.3rem); flex-shrink: 0; }
+.resource-link .r-label {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+}
+.resource-link .r-url {
+  font-family: var(--font-mono);
+  font-size: calc(var(--small-size) * 0.88);
+  color: var(--cyan);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* CIBA flow illustration */
+.ciba-flow {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.7vw, 0.6rem);
+}
+.ciba-step {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+}
+.ciba-step .cstep-num {
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: calc(var(--small-size) * 0.9);
+  font-weight: 700;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation dots -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Keyboard hint -->
+<div class="keyboard-hint" aria-hidden="true">
+  <kbd>↑</kbd><kbd>↓</kbd> or <kbd>Space</kbd> to navigate
+</div>
+
+<!-- ============================================================
+     SLIDE 1 — TITLE
+     ============================================================ -->
+<!-- Speaker notes: Welcome. Set the scene — AI agents are doing real things now, not just answering questions. This talk is about making them safe to trust. -->
+<section class="slide slide-border-cyan" id="slide-1" aria-label="Title slide">
+  <div class="slide-content">
+    <p class="title-eyebrow reveal d1">Identity · Observability · AI Agents</p>
+    <h1 class="title-main reveal d2">
+      Trust,<br>but Verify
+      <span class="slash">Identity &amp; Observability<br>for AI Agents</span>
+    </h1>
+    <p class="title-sub reveal d3">
+      AI agents that take real actions need more than a system prompt to be safe.
+    </p>
+    <div class="speaker-row reveal d4">
+      <picture>
+        <source srcset="assets/aydrian+atticus25-400.avif" type="image/avif">
+        <img
+          src="assets/aydrian+atticus25-400.jpg"
+          alt="Aydrian Howard"
+          class="speaker-photo"
+          onerror="this.style.display='none'"
+        >
+      </picture>
+      <div class="speaker-info">
+        <span class="speaker-name">Aydrian Howard</span>
+        <span class="speaker-title">Senior Developer Advocate · Auth0 / Okta · @itsaydrian</span>
+      </div>
+    </div>
+  </div>
+  <div class="pillar-tags reveal d5">
+    <span class="label label-cyan">Identity</span>
+    <span class="label label-mag">Observability</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 2 — THE PROMISE OF AI AGENTS
+     ============================================================ -->
+<!-- Speaker notes: Agents don't just chat — they act. Reading your email, scheduling meetings, querying private docs, making purchases. Useful AND risky. -->
+<section class="slide" id="slide-2" aria-label="The Promise of AI Agents">
+  <div class="slide-content">
+    <span class="label label-cyan reveal d1">The new reality</span>
+    <h2 class="reveal d2" style="margin-top: var(--content-gap);">
+      AI Agents Don't Just Answer.<br>
+      <span class="accent-cyan">They Act.</span>
+    </h2>
+    <div class="grid reveal d3" style="margin-top: var(--content-gap);">
+      <div class="card">
+        <div class="card-icon">✉️</div>
+        <div class="card-title">Read your inbox</div>
+        <div class="card-desc">Searching, summarizing, and extracting action items from email</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📅</div>
+        <div class="card-title">Manage your calendar</div>
+        <div class="card-desc">Finding, creating, and rescheduling events on your behalf</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Query private docs</div>
+        <div class="card-desc">Searching knowledge bases with access to sensitive information</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛒</div>
+        <div class="card-title">Make purchases</div>
+        <div class="card-desc">Completing transactions with real money on your account</div>
+      </div>
+    </div>
+    <p class="reveal d4" style="margin-top: var(--content-gap); font-size: var(--body-size);">
+      This is <strong style="color: var(--text-primary);">genuinely useful</strong>.
+      It's also <strong style="color: var(--red-warn);">genuinely risky</strong>.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 3 — TWO QUESTIONS
+     ============================================================ -->
+<!-- Speaker notes: Every production agent must answer two questions. Without both, you have a powerful agent you can't trust or debug. These are the two pillars of this talk. -->
+<section class="slide" id="slide-3" aria-label="Two Questions Every Agent Must Answer">
+  <div class="slide-content">
+    <h2 class="reveal d1">Two Questions Every Agent<br>Must Answer</h2>
+    <div class="question-split reveal d2" style="margin-top: var(--content-gap); flex: 1; max-height: 62vh;">
+      <div class="q-panel cyan-panel">
+        <div class="q-number" style="color: var(--cyan);">1</div>
+        <span class="label label-cyan" style="align-self: flex-start;">Pillar One</span>
+        <p class="q-question">"Are you <em>allowed</em> to do that?"</p>
+        <p class="q-answer accent-cyan">Identity</p>
+        <p class="q-desc">Delegated authorization, scoped tokens, user-confirmation flows — ensuring the agent acts within sanctioned boundaries.</p>
+      </div>
+      <div class="q-panel mag-panel">
+        <div class="q-number" style="color: var(--magenta);">2</div>
+        <span class="label label-mag" style="align-self: flex-start;">Pillar Two</span>
+        <p class="q-question">"What did you <em>actually</em> do?"</p>
+        <p class="q-answer accent-mag">Observability</p>
+        <p class="q-desc">Structured traces of every LLM call, tool invocation, and retrieval — so you can audit, debug, and improve.</p>
+      </div>
+    </div>
+    <p class="reveal d3" style="margin-top: var(--content-gap); font-size: var(--small-size); color: var(--text-dim); text-align: center;">
+      Without both, you have a powerful agent you can't trust or debug.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 4 — MEET ASSISTANT0
+     ============================================================ -->
+<!-- Speaker notes: Our demo app is Assistant0 — a personal AI assistant wired up to Gmail, Calendar, Tasks, GitHub, Slack, a RAG pipeline, and an online shop. Secured with identity management, traced end-to-end with Arize AX. -->
+<section class="slide slide-border-cyan" id="slide-4" aria-label="Meet Assistant0">
+  <div class="slide-content">
+    <span class="label label-cyan reveal d1">The demo app</span>
+    <h2 class="reveal d2" style="margin-top: var(--content-gap);">
+      Meet <span class="accent-cyan">Assistant0</span>
+    </h2>
+    <p class="reveal d3" style="max-width: 55ch; margin-bottom: var(--content-gap);">
+      A personal AI assistant built on <strong style="color: var(--text-primary);">Vercel AI SDK + Next.js</strong>.
+      Secured with <strong style="color: var(--text-primary);">Auth0</strong> for identity management. Traced end-to-end with <strong style="color: var(--text-primary);">Arize AX</strong>.
+    </p>
+    <div class="tool-chips reveal d3" style="margin-bottom: var(--content-gap);">
+      <span class="chip cyan">Gmail</span>
+      <span class="chip cyan">Google Calendar</span>
+      <span class="chip cyan">Google Tasks</span>
+      <span class="chip cyan">GitHub</span>
+      <span class="chip cyan">Web Search</span>
+      <span class="chip cyan">Document RAG</span>
+      <span class="chip cyan">Online Shopping</span>
+    </div>
+    <div class="arch-flow reveal d4">
+      <div class="arch-node">
+        <div class="node-label">👤 User</div>
+        <div class="node-sub">Chat UI</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node accent">
+        <div class="node-label">🤖 LLM</div>
+        <div class="node-sub">Decision Loop</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="node-label">🔧 Tools</div>
+        <div class="node-sub">8 integrations</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="node-label">🌐 APIs</div>
+        <div class="node-sub">External services</div>
+      </div>
+    </div>
+    <div class="reveal d5" style="margin-top: var(--content-gap); display: flex; gap: clamp(0.5rem, 1vw, 0.8rem);">
+      <span class="label label-cyan">Identity via Auth0</span>
+      <span class="label label-mag">Observability via Arize AX</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 5 — PILLAR 1: IDENTITY
+     ============================================================ -->
+<!-- Speaker notes: The naive approach is hardcoded API keys or shared credentials. The right approach: delegated authorization — the agent gets scoped, revocable tokens that expire. Crucially, for high-stakes actions, we require explicit user confirmation. The agent acts AS the user, not as a superuser. -->
+<section class="slide" id="slide-5" aria-label="Pillar 1: Identity">
+  <div class="slide-content">
+    <div style="display: flex; align-items: center; gap: 1em; margin-bottom: var(--content-gap);">
+      <span class="label label-cyan reveal d1">Pillar 1</span>
+    </div>
+    <h2 class="reveal d2">
+      <span class="accent-cyan">Identity</span>
+    </h2>
+    <div class="two-col reveal d3" style="flex: 1; align-items: start; margin-top: var(--content-gap);">
+      <ul class="point-list">
+        <li class="reveal d3"><span>Agents need access to third-party APIs <strong>on behalf of a user</strong></span></li>
+        <li class="reveal d4"><span>Naive approach: hardcoded keys, shared credentials → <strong style="color:var(--red-warn);">over-permissioned</strong></span></li>
+        <li class="reveal d5"><span>Better: <strong>delegated authorization</strong> — scoped, revocable tokens</span></li>
+        <li class="reveal d6"><span><strong>User-confirmation flows</strong> for consequential actions (purchases, sends)</span></li>
+        <li class="reveal d7"><span>Key insight: <strong>the agent acts as the user, not as a superuser</strong></span></li>
+      </ul>
+      <div class="reveal d4" style="display: flex; flex-direction: column; gap: clamp(0.5rem, 1vw, 0.9rem);">
+        <div class="card">
+          <div class="card-icon">🔑</div>
+          <div class="card-title" style="color: var(--cyan);">Scoped tokens</div>
+          <div class="card-desc">Read-only Gmail access. Can't send. Can't delete.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⏱️</div>
+          <div class="card-title" style="color: var(--cyan);">Short-lived &amp; revocable</div>
+          <div class="card-desc">Tokens expire. Users can revoke at any time.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔔</div>
+          <div class="card-title" style="color: var(--cyan);">Human-in-the-loop</div>
+          <div class="card-desc">Purchases and sensitive writes require approval.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — DEMO: IDENTITY IN ACTION
+     ============================================================ -->
+<!-- Speaker notes:
+     DEMO 1 — Tool Call Tracing / Gmail OAuth:
+       Prompt: "What are my most recent emails about AI?"
+       Show the scoped token — agent can READ but not SEND.
+       In Arize AX: root LLM span, child gmailSearchTool span, exact JSON inputs/outputs.
+
+     DEMO 4 — CIBA Async Authorization:
+       Prompt: "Buy me 1 pair of wireless headphones under $150"
+       Agent pauses, sends push notification to device.
+       Approve on phone → purchase completes.
+       In Arize AX: auth interrupt span with timing, wait period, execution after approval.
+-->
+<section class="slide slide-border-amber" id="slide-6" aria-label="Demo: Identity in Action">
+  <div class="slide-content">
+    <div class="demo-header">
+      <h2 class="reveal d1">Identity in Action</h2>
+      <span class="live-demo-badge reveal d1">Live Demo</span>
+    </div>
+    <div class="two-col reveal d2">
+      <!-- Gmail OAuth demo -->
+      <div style="display: flex; flex-direction: column; gap: var(--content-gap);">
+        <span class="label label-cyan">Scoped Authorization</span>
+        <div class="prompt-block">"What are my most recent emails about AI?"</div>
+        <ul class="point-list" style="font-size: var(--small-size);">
+          <li><span>Agent requests a <strong>read-only Gmail token</strong></span></li>
+          <li><span>Calls Gmail API — can read, <strong style="color:var(--red-warn);">cannot send</strong></span></li>
+          <li><span>Token is scoped, time-limited, revocable</span></li>
+        </ul>
+      </div>
+      <!-- CIBA demo -->
+      <div style="display: flex; flex-direction: column; gap: var(--content-gap);">
+        <span class="label label-amber">CIBA — Human-in-the-Loop</span>
+        <div class="prompt-block mag">"Buy me 1 pair of wireless headphones under $150"</div>
+        <div class="ciba-flow">
+          <div class="ciba-step reveal d3">
+            <span class="cstep-num">1</span>
+            Agent calls <code style="color:var(--amber); font-size:inherit;">shopOnlineTool</code>
+          </div>
+          <div class="ciba-step reveal d4">
+            <span class="cstep-num">2</span>
+            CIBA request sent — push notification to your device
+          </div>
+          <div class="ciba-step reveal d5">
+            <span class="cstep-num">3</span>
+            <strong style="color:var(--text-primary);">User approves on phone</strong> → agent resumes
+          </div>
+          <div class="ciba-step reveal d6">
+            <span class="cstep-num">4</span>
+            Purchase completes — <strong style="color:var(--text-primary);">only after explicit approval</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="reveal d7" style="margin-top: var(--content-gap); font-size: var(--small-size); color: var(--text-dim);">
+      In Arize AX: trace shows the auth interrupt span with timing, wait period, and execution after approval.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 7 — PILLAR 2: OBSERVABILITY
+     ============================================================ -->
+<!-- Speaker notes: Even a correctly authorized agent is a black box by default. You can't tell what model was called, what prompt was sent, which tool ran, what it got back. Observability gives you structured traces of every decision in the agent loop. -->
+<section class="slide" id="slide-7" aria-label="Pillar 2: Observability">
+  <div class="slide-content">
+    <div style="display: flex; align-items: center; gap: 1em; margin-bottom: var(--content-gap);">
+      <span class="label label-mag reveal d1">Pillar 2</span>
+    </div>
+    <h2 class="reveal d2">
+      <span class="accent-mag">Observability</span>
+    </h2>
+    <div class="two-col reveal d3" style="flex: 1; align-items: start; margin-top: var(--content-gap);">
+      <ul class="point-list mag">
+        <li class="reveal d3"><span>A correctly authorized agent is still a <strong>black box by default</strong></span></li>
+        <li class="reveal d4"><span>What model was called? What prompt was sent? Which tool ran?</span></li>
+        <li class="reveal d5"><span><strong>Observability</strong> = structured traces of every decision in the agent loop</span></li>
+        <li class="reveal d6"><span>Enables: <strong>debugging</strong>, latency analysis, cost tracking, quality evaluation</span></li>
+      </ul>
+      <div class="reveal d4" style="display: flex; flex-direction: column; gap: clamp(0.5rem, 1vw, 0.9rem);">
+        <div class="card" style="border-color: rgba(255,0,170,0.2);">
+          <div class="card-icon">🔍</div>
+          <div class="card-title" style="color: var(--magenta);">Every LLM call</div>
+          <div class="card-desc">Model, prompt, token count, latency, cost</div>
+        </div>
+        <div class="card" style="border-color: rgba(255,0,170,0.2);">
+          <div class="card-icon">🔧</div>
+          <div class="card-title" style="color: var(--magenta);">Every tool invocation</div>
+          <div class="card-desc">Exact JSON inputs, full outputs, duration</div>
+        </div>
+        <div class="card" style="border-color: rgba(255,0,170,0.2);">
+          <div class="card-icon">📚</div>
+          <div class="card-title" style="color: var(--magenta);">Every retrieval</div>
+          <div class="card-desc">Chunks fetched, similarity scores, auth filters</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 8 — DEMO: OBSERVABILITY IN ACTION
+     ============================================================ -->
+<!-- Speaker notes:
+     DEMO 1 — Tool Call Tracing (Arize AX trace view):
+       Show the trace from the Gmail request:
+         Root span: LLM call (model, prompt, token count, latency)
+         Child span: gmailSearchTool (exact JSON input, full API response, duration)
+       Show the CIBA shopping trace:
+         Authorization interrupt span (timing of the wait)
+         Tool execution span after approval
+
+     In Arize AX: Traces → click trace → expand child spans → inspect I/O tab on each tool span.
+-->
+<section class="slide slide-border-mag" id="slide-8" aria-label="Demo: Observability in Action">
+  <div class="slide-content">
+    <div class="demo-header">
+      <h2 class="reveal d1"><span class="accent-mag">Observability</span> in Action</h2>
+      <span class="live-demo-badge reveal d1">Live Demo</span>
+    </div>
+    <div class="two-col reveal d2">
+      <div style="display: flex; flex-direction: column; gap: var(--content-gap);">
+        <span class="label label-mag">Gmail trace</span>
+        <div class="prompt-block">"What are my most recent emails about AI?"</div>
+        <div class="trace-tree">
+          <div class="trace-row trace-root">
+            <div class="trace-dot root"></div>
+            <span class="trace-name" style="color:var(--amber);">LLM Call (gpt-4o)</span>
+            <div class="trace-bar"><div class="trace-fill amber" style="width:100%"></div></div>
+            <span class="trace-ms" style="color:var(--amber);">842ms</span>
+          </div>
+          <div class="trace-row trace-indent">
+            <div class="trace-dot cyan"></div>
+            <span class="trace-name">gmailSearchTool</span>
+            <div class="trace-bar"><div class="trace-fill" style="width:37%"></div></div>
+            <span class="trace-ms">312ms</span>
+          </div>
+          <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+            <span>input: <span style="color: var(--cyan);">{"query": "AI emails"}</span></span>
+          </div>
+          <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+            <span>output: <span style="color: var(--cyan);">3 emails found</span></span>
+          </div>
+          <div class="trace-row trace-indent" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+            <span>tokens: <span style="color: var(--magenta);">1,247 prompt</span> / <span style="color: var(--cyan);">89 completion</span></span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: var(--content-gap);">
+        <span class="label label-amber">Shopping / CIBA trace</span>
+        <div class="prompt-block mag">"Buy me 1 pair of wireless headphones under $150"</div>
+        <div class="trace-tree">
+          <div class="trace-row trace-root">
+            <div class="trace-dot root"></div>
+            <span class="trace-name" style="color:var(--amber);">LLM Call</span>
+            <div class="trace-bar"><div class="trace-fill amber" style="width:100%"></div></div>
+            <span class="trace-ms" style="color:var(--amber);">4.2s</span>
+          </div>
+          <div class="trace-row trace-indent">
+            <div class="trace-dot" style="background:var(--amber);"></div>
+            <span class="trace-name" style="color:var(--amber);">⏸ Auth Interrupt</span>
+            <div class="trace-bar"><div class="trace-fill amber" style="width:85%"></div></div>
+            <span class="trace-ms" style="color:var(--amber);">3.6s</span>
+          </div>
+          <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+            <span>CIBA push sent — awaiting user approval</span>
+          </div>
+          <div class="trace-row trace-indent">
+            <div class="trace-dot mag"></div>
+            <span class="trace-name mag">shopOnlineTool</span>
+            <div class="trace-bar"><div class="trace-fill mag" style="width:14%"></div></div>
+            <span class="trace-ms">580ms</span>
+          </div>
+          <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+            <span style="color: var(--cyan);">✓ approved → purchase complete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="reveal d5" style="margin-top: var(--content-gap); font-size: var(--small-size); color: var(--text-dim);">
+      Arize AX: Traces → click trace → expand child spans → inspect I/O tab on each tool span
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 9 — DEMO: RAG + AUTHORIZATION
+     ============================================================ -->
+<!-- Speaker notes:
+     DEMO 2 — RAG Pipeline Visibility:
+       Setup: Upload demo-docs/ai-agent-security-policy.pdf at localhost:3000/documents
+       Document: "AI Agent Security Policy" (SEC-AI-0042) — internal policy covering scoped authorization, FGA, observability, CIBA, and incident response
+       Prompt: "What does my knowledge base say about authorization policies?"
+       getContextDocumentsTool → embedding query → cosine similarity search → FGA filter
+       In Arize AX: retrieval span shows query embedding, top-k chunks (Sec 2 + Sec 3 score highest), similarity scores, which chunks passed FGA can_view check.
+       Key: observability makes retrieval quality VISIBLE — not just "it answered" but "what did it find and who was allowed to see it?"
+-->
+<section class="slide slide-border-mag" id="slide-9" aria-label="Demo: RAG + Authorization">
+  <div class="slide-content">
+    <div class="demo-header">
+      <h2 class="reveal d1">RAG <span style="color: var(--text-dim);">+</span> <span class="accent-cyan">Authorization</span></h2>
+      <span class="live-demo-badge reveal d1">Live Demo</span>
+    </div>
+    <div class="prompt-block reveal d2">"What does my knowledge base say about authorization policies?"</div>
+    <div class="pipeline reveal d3" style="margin: var(--content-gap) 0;">
+      <div class="pipeline-step active">
+        <div class="step-icon">🧠</div>
+        <div class="step-name">Embed Query</div>
+        <div class="step-desc">vector</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step active">
+        <div class="step-icon">🔎</div>
+        <div class="step-name">Cosine Search</div>
+        <div class="step-desc">top-k chunks</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step active">
+        <div class="step-icon">🔐</div>
+        <div class="step-name">FGA Filter</div>
+        <div class="step-desc">can_view check</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step active">
+        <div class="step-icon">🤖</div>
+        <div class="step-name">LLM Context</div>
+        <div class="step-desc">authorized only</div>
+      </div>
+    </div>
+    <div class="trace-tree reveal d4">
+      <div class="trace-row trace-root">
+        <div class="trace-dot root"></div>
+        <span class="trace-name" style="color:var(--amber);">LLM Call</span>
+        <div class="trace-bar"><div class="trace-fill amber" style="width:100%"></div></div>
+        <span class="trace-ms" style="color:var(--amber);">1.1s</span>
+      </div>
+      <div class="trace-row trace-indent">
+        <div class="trace-dot cyan"></div>
+        <span class="trace-name">getContextDocumentsTool</span>
+        <div class="trace-bar"><div class="trace-fill" style="width:45%"></div></div>
+        <span class="trace-ms">480ms</span>
+      </div>
+      <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+        <span>chunks: 8 retrieved · top scores: <span style="color: var(--text-secondary);">Sec 2 Scoped Auth</span> 0.94 · <span style="color: var(--text-secondary);">Sec 3 FGA Data Access</span> 0.91 · 0.88…</span>
+      </div>
+      <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.88);">
+        <span>FGA: <span style="color: var(--cyan);">5 passed</span> can_view · <span style="color: var(--red-warn);">3 filtered out</span></span>
+      </div>
+    </div>
+    <p class="reveal d5" style="margin-top: var(--content-gap); font-size: var(--small-size); color: var(--text-dim);">
+      Key: observability makes retrieval quality <em style="color:var(--text-secondary);">visible</em> — not just "it answered," but "what did it find and who was allowed to see it?"
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — DEMO: MULTI-TOOL CHAINING
+     ============================================================ -->
+<!-- Speaker notes:
+     DEMO 3 — Multi-Tool Chaining:
+       Prompt: "Search my emails for anything about next week's meeting, then create a task to follow up"
+       Two tools fire in sequence: gmailSearchTool → createTasksTool
+       In Arize AX: trace tree shows each tool span nested under root LLM span in invocation order.
+       Great for visualizing agent reasoning — you can see the full chain, not just the final answer.
+-->
+<section class="slide slide-border-mag" id="slide-10" aria-label="Demo: Multi-Tool Chaining">
+  <div class="slide-content">
+    <div class="demo-header">
+      <h2 class="reveal d1">Multi-Tool <span class="accent-mag">Chaining</span></h2>
+      <span class="live-demo-badge reveal d1">Live Demo</span>
+    </div>
+    <div class="prompt-block reveal d2">
+      "Search my emails for anything about next week's meeting, then create a task to follow up"
+    </div>
+    <div class="two-col reveal d3" style="margin-top: var(--content-gap); align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: var(--content-gap);">
+        <span class="label label-mag">Span tree in Arize AX</span>
+        <div class="trace-tree">
+          <div class="trace-row trace-root">
+            <div class="trace-dot root"></div>
+            <span class="trace-name" style="color:var(--amber);">LLM Call (root)</span>
+            <div class="trace-bar"><div class="trace-fill amber" style="width:100%"></div></div>
+            <span class="trace-ms" style="color:var(--amber);">1,240ms</span>
+          </div>
+          <div class="trace-row trace-indent">
+            <div class="trace-dot cyan"></div>
+            <span class="trace-name">gmailSearchTool</span>
+            <div class="trace-bar"><div class="trace-fill" style="width:25%"></div></div>
+            <span class="trace-ms">312ms</span>
+          </div>
+          <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.85);">
+            <span>query: "next week meeting" → 2 results</span>
+          </div>
+          <div class="trace-row trace-indent">
+            <div class="trace-dot mag"></div>
+            <span class="trace-name mag">createTasksTool</span>
+            <div class="trace-bar"><div class="trace-fill mag" style="width:13%"></div></div>
+            <span class="trace-ms">156ms</span>
+          </div>
+          <div class="trace-row trace-indent2" style="color: var(--text-dim); font-size: calc(var(--code-size) * 0.85);">
+            <span>title: "Follow up on product sync" → created</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: var(--content-gap);">
+        <span class="label label-cyan">More chaining examples</span>
+        <ul class="point-list mag">
+          <li class="reveal d4">
+            <span><code style="color:var(--cyan); font-size:inherit;">getCalendarEventsTool</code> → <code style="color:var(--magenta); font-size:inherit;">listRepositories</code></span>
+          </li>
+          <li class="reveal d5">
+            <span>Each tool span shows <strong>exact inputs, outputs, and latency</strong></span>
+          </li>
+          <li class="reveal d6">
+            <span>The full <strong>reasoning chain is auditable</strong> — not just the final answer</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 11 — IDENTITY + OBSERVABILITY TOGETHER
+     ============================================================ -->
+<!-- Speaker notes: Identity tells you what the agent SHOULD be able to do. Observability tells you what it ACTUALLY did. Together they answer the question we started with: did my agent do the right thing, and can I prove it? This is the baseline for production agents. -->
+<section class="slide" id="slide-11" aria-label="Identity + Observability Together">
+  <div class="slide-content">
+    <h2 class="reveal d1">Together</h2>
+    <div class="two-col reveal d2" style="margin-top: var(--content-gap); align-items: start;">
+      <div class="card" style="border-color: rgba(0,255,204,0.25); box-shadow: 0 0 24px var(--cyan-glow); gap: clamp(0.6rem,1.2vw,1rem);">
+        <span class="label label-cyan">Identity</span>
+        <h3 style="color: var(--cyan);">What the agent<br><em style="font-style:normal;">should</em> do</h3>
+        <ul class="point-list" style="font-size: var(--small-size);">
+          <li><span>Scoped, delegated tokens</span></li>
+          <li><span>User-confirmed actions</span></li>
+          <li><span>Fine-grained authorization</span></li>
+        </ul>
+      </div>
+      <div class="card" style="border-color: rgba(255,0,170,0.25); box-shadow: 0 0 24px var(--magenta-glow); gap: clamp(0.6rem,1.2vw,1rem);">
+        <span class="label label-mag">Observability</span>
+        <h3 style="color: var(--magenta);">What the agent<br><em style="font-style:normal;">actually</em> did</h3>
+        <ul class="point-list mag" style="font-size: var(--small-size);">
+          <li><span>Full trace of every call</span></li>
+          <li><span>Tool inputs &amp; outputs</span></li>
+          <li><span>Latency, cost, quality</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="synthesis-box reveal d3" style="margin-top: var(--content-gap);">
+      <p class="synthesis-quote">
+        "Did my agent do the right thing,<br>
+        <em>and can I prove it?</em>"
+      </p>
+      <p style="margin-top: 0.75em; font-size: var(--small-size); color: var(--text-dim);">
+        This is the baseline for production AI agents.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — KEY TAKEAWAYS
+     ============================================================ -->
+<!-- Speaker notes: Four things to take away. The third one — trace everything — is the one most teams skip. Don't. You will regret it when you're debugging a subtle reasoning failure at 2am. -->
+<section class="slide slide-border-cyan" id="slide-12" aria-label="Key Takeaways">
+  <div class="slide-content">
+    <h2 class="reveal d1">Key Takeaways</h2>
+    <ul class="takeaway-list" style="margin-top: var(--content-gap);">
+      <li class="reveal d2">
+        <span class="t-num">1</span>
+        <span class="t-text">Give your agent <strong>an identity, not a skeleton key</strong> — scoped, revocable tokens, never hardcoded credentials.</span>
+      </li>
+      <li class="reveal d3">
+        <span class="t-num">2</span>
+        <span class="t-text">Require <strong>explicit user confirmation</strong> for consequential actions — purchases, sends, deletes.</span>
+      </li>
+      <li class="reveal d4">
+        <span class="t-num">3</span>
+        <span class="t-text"><strong>Trace everything</strong> — LLM calls, tool calls, retrievals. Observability is how you debug, improve, and trust your agent.</span>
+      </li>
+      <li class="reveal d5">
+        <span class="t-num">4</span>
+        <span class="t-text">Observability is <strong>not optional</strong> — you can't fix what you can't see. Add it from day one.</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 13 — Q&A / RESOURCES
+     ============================================================ -->
+<!-- Speaker notes: Questions? Here are the resources. The Assistant0 repo has everything wired up — you can fork it and have a traced, identity-aware agent running in under an hour. -->
+<section class="slide" id="slide-13" aria-label="Q&A and Resources">
+  <div class="slide-content">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--content-gap); margin-bottom: var(--content-gap);">
+      <div>
+        <h2 class="reveal d1">Questions?</h2>
+        <p class="reveal d2" style="max-width: 40ch; margin-top: 0.4em;">Let's talk identity, observability, and making AI agents worth trusting.</p>
+      </div>
+      <div class="speaker-row reveal d2" style="flex-shrink: 0;">
+        <picture>
+          <source srcset="assets/aydrian+atticus25-400.avif" type="image/avif">
+          <img
+            src="assets/aydrian+atticus25-400.jpg"
+            alt="Aydrian Howard"
+            class="speaker-photo"
+            style="width: clamp(3rem, 5vw, 4.5rem); height: clamp(3rem, 5vw, 4.5rem);"
+            onerror="this.style.display='none'"
+          >
+        </picture>
+        <div class="speaker-info">
+          <span class="speaker-name">Aydrian Howard</span>
+          <span class="speaker-title">@itsaydrian · itsaydrian.dev</span>
+        </div>
+      </div>
+    </div>
+    <div class="resource-grid reveal d3">
+      <a class="resource-link" href="https://github.com/aydrian/assistant0-vercel-arize" aria-label="Demo App">
+        <span class="r-icon">🤖</span>
+        <div>
+          <span class="r-label">Demo App</span>
+          <span class="r-url">github.com/aydrian/assistant0-vercel-arize</span>
+        </div>
+      </a>
+      <a class="resource-link" href="https://vercel.com/docs/ai" aria-label="Vercel AI SDK">
+        <span class="r-icon">⚡</span>
+        <div>
+          <span class="r-label">Vercel AI SDK</span>
+          <span class="r-url">sdk.vercel.ai</span>
+        </div>
+      </a>
+      <a class="resource-link" href="https://auth0.com/ai" aria-label="Auth0 for AI Agents">
+        <span class="r-icon">🔑</span>
+        <div>
+          <span class="r-label">Auth0 for AI Agents</span>
+          <span class="r-url">auth0.com/ai</span>
+        </div>
+      </a>
+      <a class="resource-link" href="https://app.arize.com" aria-label="Arize AX">
+        <span class="r-icon">🔭</span>
+        <div>
+          <span class="r-label">Arize AX</span>
+          <span class="r-url">app.arize.com</span>
+        </div>
+      </a>
+    </div>
+    <div class="reveal d4" style="margin-top: var(--content-gap); display: flex; gap: clamp(0.4rem, 0.8vw, 0.8rem);">
+      <span class="label label-cyan">Identity</span>
+      <span class="label label-mag">Observability</span>
+      <span class="label" style="background: var(--bg-surface); border: 1px solid var(--border-dim); color: var(--text-secondary);">#TrustButVerify</span>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles: keyboard nav, touch/swipe, wheel,
+   intersection observer, progress bar, nav dots
+   =========================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.total = this.slides.length;
+    this.current = 0;
+
+    this.progressBar = document.getElementById('progressBar');
+    this.navDotsContainer = document.getElementById('navDots');
+
+    this.buildNavDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboard();
+    this.setupTouch();
+    this.setupWheel();
+    this.setupHashNav();
+    this.setupResizeHandler();
+    this.updateProgress(0);
+  }
+
+  /* Build nav dot buttons */
+  buildNavDots() {
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      btn.addEventListener('click', () => this.goTo(i));
+      this.navDotsContainer.appendChild(btn);
+    });
+    this.dots = Array.from(this.navDotsContainer.querySelectorAll('.nav-dot'));
+  }
+
+  /* Intersection Observer — adds .visible to trigger animations */
+  setupIntersectionObserver() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const idx = this.slides.indexOf(entry.target);
+          if (idx !== -1) {
+            this.current = idx;
+            this.updateProgress(idx);
+            this.updateDots(idx);
+            if (entry.target.id) {
+              history.replaceState(null, '', '#' + entry.target.id);
+            }
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    this.slides.forEach(s => io.observe(s));
+  }
+
+  /* Keyboard: arrows, space, page keys */
+  setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (['ArrowDown', 'ArrowRight', ' ', 'PageDown'].includes(e.key)) {
+        e.preventDefault();
+        this.goTo(this.current + 1);
+      } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+        this.goTo(this.current - 1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        this.goTo(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        this.goTo(this.total - 1);
+      }
+    });
+  }
+
+  /* Touch/swipe */
+  setupTouch() {
+    let startY = 0;
+    document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const delta = startY - e.changedTouches[0].clientY;
+      if (Math.abs(delta) > 50) {
+        this.goTo(delta > 0 ? this.current + 1 : this.current - 1);
+      }
+    }, { passive: true });
+  }
+
+  /* Mouse wheel */
+  setupWheel() {
+    let locked = false;
+    document.addEventListener('wheel', e => {
+      if (locked) return;
+      locked = true;
+      this.goTo(e.deltaY > 0 ? this.current + 1 : this.current - 1);
+      setTimeout(() => { locked = false; }, 900);
+    }, { passive: true });
+  }
+
+  /* Hash-based slide navigation */
+  setupHashNav() {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const target = document.getElementById(hash);
+      if (target) {
+        const idx = this.slides.indexOf(target);
+        if (idx !== -1) {
+          target.scrollIntoView();
+          this.current = idx;
+          this.updateProgress(idx);
+          this.updateDots(idx);
+        }
+      }
+    }
+    window.addEventListener('hashchange', () => {
+      const h = window.location.hash.slice(1);
+      if (!h) return;
+      const t = document.getElementById(h);
+      if (t) {
+        const i = this.slides.indexOf(t);
+        if (i !== -1) this.goTo(i);
+      }
+    });
+  }
+
+  /* Resize / zoom recovery */
+  setupResizeHandler() {
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        this.slides[this.current].scrollIntoView();
+      }, 150);
+    });
+  }
+
+  /* Navigate to slide index */
+  goTo(idx) {
+    if (idx < 0 || idx >= this.total) return;
+    this.slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* Update progress bar */
+  updateProgress(idx) {
+    const pct = this.total <= 1 ? 100 : (idx / (this.total - 1)) * 100;
+    this.progressBar.style.width = pct + '%';
+  }
+
+  /* Update active dot */
+  updateDots(idx) {
+    this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+}
+
+/* ===========================================
+   TRACE BAR ANIMATION
+   Animates width when slide becomes visible
+   =========================================== */
+function animateTraceBars() {
+  const fills = document.querySelectorAll('.trace-fill');
+  fills.forEach(fill => {
+    const target = fill.style.width;
+    fill.style.width = '0%';
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(() => { fill.style.width = target; }, 300);
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    io.observe(fill);
+  });
+}
+
+/* Init */
+document.addEventListener('DOMContentLoaded', () => {
+  new SlidePresentation();
+  animateTraceBars();
+});
+</script>
+
+</body>
+</html>
